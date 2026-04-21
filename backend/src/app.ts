@@ -2,44 +2,48 @@ import express, { Application } from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import logRoutes from "./routes/logRoutes";
+import salleRoutes from "./routes/salleRoutes"
 import { limiter } from "./middlewares/rateLimiter";
 
 const app: Application = express();
 
-// Parse allowed origins from environment variable
-const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [];
-
-// Dynamic CORS configuration based on environment
+/* =========================
+   CORS CONFIGURATION
+========================= */
 const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Check if origin is allowed
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
+  origin: process.env.NODE_ENV === "production" 
+    ? process.env.FRONTEND_URL || "https://yourdomain.com"  // Production URL
+    : true, // Allow all origins in development
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, // Required for Socket.io and auth
 };
 
-// Middleware
 app.use(cors(corsOptions));
+
+/* =========================
+   MIDDLEWARES
+========================= */
 app.use(express.json());
 app.use(limiter);
 
-// Routes
+/* =========================
+   ROUTES
+========================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/logs", logRoutes);
+app.use("/api/salle", salleRoutes)
 
-// Optional: Add a route to check allowed origins (for debugging)
-if (process.env.NODE_ENV !== 'production') {
-  app.get('/api/cors-config', (req, res) => {
-    res.json({ allowedOrigins });
+/* =========================
+   DEBUG ROUTE (DEV ONLY)
+========================= */
+if (process.env.NODE_ENV !== "production") {
+  app.get("/api/cors-config", (_req, res) => {
+    res.json({
+      cors: "OPEN",
+      message: "All origins allowed (dev mode)",
+      config: corsOptions
+    });
   });
 }
 
