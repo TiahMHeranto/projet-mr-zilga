@@ -315,9 +315,19 @@ export default function Dashboard() {
             </div>
           </Link>
 
+          <Link to="/salles/historique">
+            <div className={`px-3 py-2 rounded-lg flex items-center gap-3 text-sm transition-colors ${location.pathname === "/salles/historique"
+              ? "bg-blue-50 text-blue-700 font-medium"
+              : "text-gray-600 hover:bg-gray-50"
+              }`}>
+              <DoorOpen className="w-4 h-4" />
+              Historiques
+            </div>
+          </Link>
+
           <div className="px-3 py-2 text-gray-400 rounded-lg flex items-center gap-3 text-sm cursor-not-allowed">
             <Activity className="w-4 h-4" />
-            Live Logs
+            Historiques
             <span className="text-xs text-gray-400 ml-auto">Soon</span>
           </div>
 
